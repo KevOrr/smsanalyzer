@@ -1,6 +1,4 @@
-import argparse
 import sqlite3
-import sys
 
 from smsanalyzer.models import Convo, Message
 try:
@@ -35,7 +33,3 @@ class TextraDatabase():
             msg = Message(dict(zip(names, msg_info)))
             self.convos[msg_info[1]].messages.append(msg)
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Analyze a Textra messging.db database')
-    parser.add_argument('-u', 'is-uri', action='store_const', const
-    parser.add_argument('path', type=argparse.FileType('r'))
