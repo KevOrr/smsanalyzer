@@ -18,7 +18,7 @@ class TextraDatabase():
                 raise e
         if is_uri is None:
             is_uri = conf.get('is_uri', False)
-        self.convos = []
+        self.convos = {}
         self._conn = sqlite3.connect(dbpath, uri=is_uri)
         self.populate()
 
@@ -26,7 +26,7 @@ class TextraDatabase():
         res = self._conn.execute('select * from convos order by _id asc;')
         names = next(zip(*res.description))
         for convo_info in res:
-            self.convos.append(Convo(dict(zip(names, convo_info))))
+            self.convos[convo_info[0]] = Convo(dict(zip(names, convo_info)))
         res = self._conn.execute('select * from messages order by _id asc;')
         names = next(zip(*res.description))
         for i, msg_info in enumerate(res):
