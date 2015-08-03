@@ -15,6 +15,15 @@ def chi2(x, df, a, b):
     x = x / b
     return a / (2**(df/2) * scipy.special.gamma(df/2)) * (x)**(df/2-1) * np.exp(-x/2)
 
+def plot_compute_fit(func, x, y, p0, domain, color):
+    try:
+        params, _ = scipy.optimize.curve_fit(func, x, y, p0)
+    except (scipy.optimize.OptimizeWarning, RuntimeError) as e:
+        warnings.warn(e.args[0], scipy.optimize.OptimizeWarning, 2)
+    else:
+        fit_y = func(domain, *params)
+        plt.plot(domain, fit_y, color)
+
 def analysis(func):
     analysis_funcs.append(func)
     analysis_funcs.sort(key=lambda f: f.__name__)
@@ -51,21 +60,8 @@ def visualize_response_times(convo, bins=50, lower=0, upper=600, log=False, colo
     x = np.linspace(lower, upper, 500)
     bin_centers = (edges[1:] + edges[:-1])/2
     center = (upper+lower)/2
-    try:
-        inbound_params, _ = scipy.optimize.curve_fit(chi2, bin_centers, hist[0], p0=(2, max(hist[0]), center))
-    except (scipy.optimize.OptimizeWarning, RuntimeError) as e:
-        warnings.warn(e.args[0], scipy.optimize.OptimizeWarning, 2)
-    else:
-        inbound_y = chi2(x, *inbound_params)
-        plt.plot(x, inbound_y, colors[0] + '-')
-
-    try:
-        outbound_params, _ = scipy.optimize.curve_fit(chi2, bin_centers, hist[1], p0=[2, max(hist[1]), center])
-    except (scipy.optimize.OptimizeWarning, RuntimeError) as e:
-        warnings.warn(e.args[0], scipy.optimize.OptimizeWarning, 2)
-    else:
-        outbound_y = chi2(x, *outbound_params)
-        plt.plot(x, outbound_y, colors[1] + '-')
+    plot_compute_fit(chi2, bin_centers, hist[0], [2, max(hist[0]), center], domain, colors[0] + '-')
+    plot_compute_fit(chi2, bin_centers, hist[1], [2, max(hist[1]), center], domain, colors[1] + '-')
 
     # Configure decorations and show plot
     plt.xlabel('Response Time')
@@ -76,3 +72,33 @@ def visualize_response_times(convo, bins=50, lower=0, upper=600, log=False, colo
     plt.legend()
     plt.show()
 
+@analysis
+def visualize_message_length(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):
+    inbound = [len(mess.text) for mess in convo.messages if mess.text and mess.direction == 0]
+    outbound = [len(mess.text) for mess in convo.messages if mess.text and mess.direction == 1]
+
+    # Calculate bounds if not given explicitly necessary
+    if lower is None:
+        lower = min(inbound + outbound)
+    if upper is None:
+        upper = max(inbound + outbound)
+
+    # Plot histogram
+    hist, edges, patches = plt.hist([inbound, outbound], bins, (lower, upper), histtype='bar', log=log,
+                                    color=colors, alpha=0.5, label=(convo.display_name[:20], 'You'))
+
+    # Compute and plot Chi2 fit
+    domain = np.linspace(lower, upper, 500)
+    bin_centers = (edges[1:] + edges[:-1])/2
+    center = (upper+lower)/2
+    plot_compute_fit(chi2, bin_centers, hist[0], [2, max(hist[0]), center], domain, colors[0] + '-')
+    plot_compute_fit(chi2, bin_centers, hist[1], [2, max(hist[1]), center], domain, colors[1] + '-')
+
+    # Configure decorations and show plot
+    plt.xlabel('Message Length (Characters)')
+    plt.ylabel('Count')
+    plt.title('Your vs {}\'s Message Lengths'.format(convo.display_name[:30]))
+    plt.axis((lower, upper, 0, 1.2 * max(max(hist[0]), max(hist[1]))))
+    plt.grid(grid)
+    plt.legend()
+    plt.show()
