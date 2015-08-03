@@ -2,9 +2,19 @@
 
 import warnings
 
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.optimize, scipy.special
+try:
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import scipy.optimize, scipy.special
+except ImportError:
+    warnings.warn('Without numpy, scipy, and matplotlib, you won\'t be able to run any of the visualize_* functions', ImportWarning)
+
+try:
+    import seaorn
+except ImportError:
+    warnings.warn('I recommend installing the package seaborn, it really makes pyplot plots look nicer', ImportWarning)
+else:
+    seaborn.set()
 
 analysis_funcs = []
 
@@ -57,7 +67,7 @@ def visualize_response_times(convo, bins=50, lower=0, upper=600, log=False, colo
                                     color=colors, alpha=0.5, label=(convo.display_name[:20], 'You'))
 
     # Compute and plot Chi2 fit
-    x = np.linspace(lower, upper, 500)
+    domain = np.linspace(lower, upper, 500)
     bin_centers = (edges[1:] + edges[:-1])/2
     center = (upper+lower)/2
     plot_compute_fit(chi2, bin_centers, hist[0], [2, max(hist[0]), center], domain, colors[0] + '-')
