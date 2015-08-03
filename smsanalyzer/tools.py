@@ -135,18 +135,42 @@ def get_lol_count_per_word(convo):
     for message in convo.messages:
         count = 0
         total = 0
-        if not message.text or not message.text.lower().split():
+        if not message.text or not message.text.lower().split(): # No body or 0 words
             continue
         for word in message.text.lower().split():
             total += 1
             if (word.startswith('lol') or word.endswith('lol')) and ''.join(filter(str.isalpha, word)) == 'lol':
                 count += 1
-        try:
-            (inbound, outbound)[message.direction].append(count/total)
-        except ZeroDivisionError as e:
-            print(repr(message.text))
-            raise e
+        (inbound, outbound)[message.direction].append(count/total)
     avg_in = sum(inbound)/len(inbound)
     avg_out = sum(outbound)/len(outbound)
 
     print('{}: {}\nYou: {}\n'.format(convo.display_name, avg_in, avg_out))
+
+@analysis
+def visualize_mime_types(convo, margin=0.05, colors='rb'):
+    # Get mime type names
+    types = sorted(set(m.part_content_type for m in convo.messages) - set([None]))
+    n = len(types)
+
+    # Count occurences
+    inbound, outbound = [0 for i in range(n)], [0 for i in range(n)]
+    for message in convo.messages:
+        if message.part_content_type is not None:
+            (inbound, outbound)[message.direction][types.index(message.part_content_type)] += 1
+
+    # Plot bar charts
+    ind = np.arange(n)
+    width = (1 - 2*margin)/2
+    plt.bar(ind + margin, inbound, width, color=colors[0], alpha=0.6, label=convo.display_name[:20])
+    plt.bar(ind + margin + width, outbound, width, color=colors[1], alpha=0.6, label='You')
+
+    # Configure decorations and show plot
+    plt.xlabel('Mime Type')
+    plt.ylabel('Count')
+    plt.title('Your vs {}\'s MMS Mime Types'.format(convo.display_name[:30]))
+    plt.xticks(ind + 0.5, types)
+    plt.gca().xaxis.grid(False)
+    plt.gca().yaxis.grid(True)
+    plt.legend()
+    plt.show()
