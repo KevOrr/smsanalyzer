@@ -10,7 +10,7 @@ except ImportError:
     warnings.warn('Without numpy, scipy, and matplotlib, you won\'t be able to run any of the visualize_* functions', ImportWarning)
 
 try:
-    import seaorn
+    import seaborn
 except ImportError:
     warnings.warn('I recommend installing the package seaborn, it really makes pyplot plots look nicer', ImportWarning)
 else:
