@@ -102,3 +102,41 @@ def visualize_message_length(convo, bins=50, lower=0, upper=250, log=False, colo
     plt.grid(grid)
     plt.legend()
     plt.show()
+
+@analysis
+def get_lol_count_per_message(convo):
+    inbound, outbound = [], []
+    for message in convo.messages:
+        count = 0
+        if not message.text:
+            continue
+        for word in message.text.lower().split():
+            if (word.startswith('lol') or word.endswith('lol')) and ''.join(filter(str.isalpha, word)) == 'lol':
+                count += 1
+        (inbound, outbound)[message.direction].append(count)
+    avg_in = sum(inbound)/len(inbound)
+    avg_out = sum(outbound)/len(outbound)
+
+    print('{}: {}\nYou: {}\n'.format(convo.display_name, avg_in, avg_out))
+
+@analysis
+def get_lol_count_per_word(convo):
+    inbound, outbound = [], []
+    for message in convo.messages:
+        count = 0
+        total = 0
+        if not message.text or not message.text.lower().split():
+            continue
+        for word in message.text.lower().split():
+            total += 1
+            if (word.startswith('lol') or word.endswith('lol')) and ''.join(filter(str.isalpha, word)) == 'lol':
+                count += 1
+        try:
+            (inbound, outbound)[message.direction].append(count/total)
+        except ZeroDivisionError as e:
+            print(repr(message.text))
+            raise e
+    avg_in = sum(inbound)/len(inbound)
+    avg_out = sum(outbound)/len(outbound)
+
+    print('{}: {}\nYou: {}\n'.format(convo.display_name, avg_in, avg_out))

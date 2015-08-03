@@ -68,7 +68,7 @@ def select_analysis_func():
         elif func_id < 0 or func_id > len(analysis_funcs):
             print('Please enter either 0 or a valid function number')
         else:
-            return analysis_funcs[i-1]
+            return analysis_funcs[func_id-1]
 
 main()
 
