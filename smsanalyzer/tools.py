@@ -174,3 +174,13 @@ def visualize_mime_types(convo, margin=0.05, colors='rb'):
     plt.gca().yaxis.grid(True)
     plt.legend()
     plt.show()
+
+@analysis
+def get_message_counts(convo):
+    inbound = len([m for m in convo.messages if m.direction == 0])
+    outbound = len([m for m in convo.messages if m.direction == 1])
+    print('{}: {}\nYou: {}\n'.format(convo.display_name, inbound, outbound))
+
+"""@analysis
+def visualize_emoji_counts(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):
+    unicode_ranges =""" # TODO http://unicode.org/charts/ http://apps.timwhitlock.info/emoji/tables/unicode
