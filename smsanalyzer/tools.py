@@ -34,6 +34,7 @@ def plot_compute_fit(func, x, y, p0, domain, color):
         fit_y = func(domain, *params)
         plt.plot(domain, fit_y, color)
 
+# TODO figure out if I actually will ever use this
 def truncate_string(string, length):
     if len(string) <= length:
         return string
@@ -193,7 +194,7 @@ def find_by_text(convo, search_string=None, case_sensitive=None, maxlen=10):
     print()
     if not case_sensitive:
         search_string = search_string.lower()
-    name = truncate_string(convo.display_name, maxlen)
+    name = convo.display_name[:maxlen]
     new_maxlen = max(len(name), 3) # 3 == len('You')
     fmt = '{name: >{width}}: {text}'.format
     results = []

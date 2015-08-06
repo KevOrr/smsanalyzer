@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument('-f', '--is-file', dest='is_file', action='store_const',
                         const=True, default=None,
                         help='path_or_uri is a path to a file (default)')
-    parser.add_argument('path_or_uri')
+    parser.add_argument('path_or_uri', default=None, nargs='?')
     args = parser.parse_args()
 
     if args.is_file and args.is_uri:
@@ -71,4 +71,3 @@ def select_analysis_func():
             return analysis_funcs[func_id-1]
 
 main()
-
