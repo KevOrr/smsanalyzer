@@ -34,6 +34,11 @@ def plot_compute_fit(func, x, y, p0, domain, color):
         fit_y = func(domain, *params)
         plt.plot(domain, fit_y, color)
 
+def truncate_string(string, length):
+    if len(string) <= length:
+        return string
+    return string[:max(length, 3) - 3] + '...'
+
 def analysis(func):
     analysis_funcs.append(func)
     analysis_funcs.sort(key=lambda f: f.__name__)
@@ -180,6 +185,33 @@ def get_message_counts(convo):
     inbound = len([m for m in convo.messages if m.direction == 0])
     outbound = len([m for m in convo.messages if m.direction == 1])
     print('{}: {}\nYou: {}\n'.format(convo.display_name, inbound, outbound))
+
+@analysis
+def find_by_text(convo, search_string=None, case_sensitive=None, maxlen=10):
+    search_string = search_string if search_string is not None else input('Search string: ')
+    case_sensitive = case_sensitive if case_sensitive is not None else input('Case sensitive? (y/n): ').lower() in ['y', 'yes']
+    print()
+    if not case_sensitive:
+        search_string = search_string.lower()
+    name = truncate_string(convo.display_name, maxlen)
+    new_maxlen = max(len(name), 3) # 3 == len('You')
+    fmt = '{name: >{width}}: {text}'.format
+    results = []
+    for m in convo.messages:
+        if not m.text:
+            continue
+        if case_sensitive:
+            text = m.text
+        else:
+            text = m.text.lower()
+        if search_string in text:
+            results.append(m)
+    if not convo.messages:
+        print('None found\n')
+        return
+    for m in results:
+        print(fmt(name=(name, 'You')[m.direction], width=new_maxlen, text=m.text))
+    print()
 
 """@analysis
 def visualize_emoji_counts(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):

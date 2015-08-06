@@ -11,12 +11,10 @@ class TextraDatabase():
     def __init__(self, dbpath=None, is_uri=None, conf=None):
         if conf is None:
             conf = config
+        dbpath = config.get('dbpath', dbpath)
         if dbpath is None:
-            if 'dbpath' in conf:
-                dbpath = conf['dbpath']
-            else:
-                e = ValueError('Must supply dbpath in either the config or to the initiator')
-                raise e
+            e = ValueError('Must supply dbpath in either the config or to the initiator')
+            raise e
         if is_uri is None:
             is_uri = conf.get('is_uri', False)
         self.convos = {}
@@ -55,4 +53,3 @@ class TextraMessage(_TextraBase):
     def __init__(self, info):
         self._info = info
         # ['id', 'convo_id', 'text', 'timestamp', 'direction', 'failed', 'locked', 'delivered']
-
