@@ -19,7 +19,8 @@ def main():
             func(convo)
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Analyze a Textra messaging.db database')
+    parser = argparse.ArgumentParser(description='Analyze a Textra messaging.db database',
+                                     usage='%(prog)s {-h | --help} | {-f|-u} path_or_uri')
     parser.add_argument('-u', '--is-uri', dest='is_uri', action='store_const',
                         const=True, default=False,
                         help='path_or_uri is a url (http://www.sqlite.org/uri.html)')
