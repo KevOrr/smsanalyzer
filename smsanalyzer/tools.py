@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import warnings
+import datetime, warnings
 
 try:
     import matplotlib.pyplot as plt
@@ -147,9 +147,9 @@ def get_lol_count_per_word(convo):
             total += 1
             if (word.startswith('lol') or word.endswith('lol')) and ''.join(filter(str.isalpha, word)) == 'lol':
                 count += 1
-        (inbound, outbound)[message.direction].append(count/total)
-    avg_in = sum(inbound)/len(inbound)
-    avg_out = sum(outbound)/len(outbound)
+        (inbound, outbound)[message.direction].append(count, total)
+    avg_in = sum(list(zip(inbound))[0]) / sum(list(zip(inbound))[1])
+    avg_out = sum(list(zip(outbound))[0]) / sum(list(zip(outbound))[1])
 
     print('{}: {}\nYou: {}\n'.format(convo.display_name, avg_in, avg_out))
 
@@ -213,6 +213,42 @@ def find_by_text(convo, search_string=None, case_sensitive=None, maxlen=10):
     for m in results:
         print(fmt(name=(name, 'You')[m.direction], width=new_maxlen, text=m.text))
     print()
+
+@analysis
+def visualize_message_frequency_timeline(convo, colors='rb'):
+    inbound_dict, outbound_dict = {}, {}
+    for message in convo.messages:
+        date = datetime.date.fromtimestamp(message.ts / 1000)
+        d = (inbound_dict, outbound_dict)[message.direction]
+        d.setdefault(date, 0)
+        d[date] += 1
+    dateset = set(inbound_dict.keys()) | set(outbound_dict.keys())
+    lower, upper = min(dateset), max(dateset)
+    dates = [datetime.date.fromordinal(i) for i in range(lower.toordinal(), upper.toordinal() + 1)]
+    inbound = [inbound_dict.get(date, 0) for date in dates]
+    outbound = [outbound_dict.get(date, 0) for date in dates]
+    plt.plot(dates, inbound, colors[0] + '-')
+    plt.plot(dates, outbound, colors[1] + '-')
+    plt.show()
+
+@analysis
+def visualize_word_frequency_timeline(convo, colors='rb'):
+    inbound_dict, outbound_dict = {}, {}
+    for message in convo.messages:
+        if not message.text:
+            continue
+        date = datetime.date.fromtimestamp(message.ts / 1000)
+        d = (inbound_dict, outbound_dict)[message.direction]
+        d.setdefault(date, 0)
+        d[date] += len(message.text.split())
+    dateset = set(inbound_dict.keys()) | set(outbound_dict.keys())
+    lower, upper = min(dateset), max(dateset)
+    dates = [datetime.date.fromordinal(i) for i in range(lower.toordinal(), upper.toordinal() + 1)]
+    inbound = [inbound_dict.get(date, 0) for date in dates]
+    outbound = [outbound_dict.get(date, 0) for date in dates]
+    plt.plot(dates, inbound, colors[0] + '-')
+    plt.plot(dates, outbound, colors[1] + '-')
+    plt.show()
 
 """@analysis
 def visualize_emoji_counts(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):
