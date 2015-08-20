@@ -89,7 +89,7 @@ def visualize_response_times(convo, bins=50, lower=0, upper=600, log=False, colo
     plt.show()
 
 @analysis
-def visualize_message_length(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):
+def visualize_message_lengths(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):
     inbound = [len(mess.text) for mess in convo.messages if mess.text and mess.direction == 0]
     outbound = [len(mess.text) for mess in convo.messages if mess.text and mess.direction == 1]
 
@@ -147,9 +147,9 @@ def get_lol_count_per_word(convo):
             total += 1
             if (word.startswith('lol') or word.endswith('lol')) and ''.join(filter(str.isalpha, word)) == 'lol':
                 count += 1
-        (inbound, outbound)[message.direction].append(count, total)
-    avg_in = sum(list(zip(inbound))[0]) / sum(list(zip(inbound))[1])
-    avg_out = sum(list(zip(outbound))[0]) / sum(list(zip(outbound))[1])
+        (inbound, outbound)[message.direction].append((count, total))
+    avg_in = sum(list(zip(*inbound))[0]) / sum(list(zip(*inbound))[1])
+    avg_out = sum(list(zip(*outbound))[0]) / sum(list(zip(*outbound))[1])
 
     print('{}: {}\nYou: {}\n'.format(convo.display_name, avg_in, avg_out))
 
