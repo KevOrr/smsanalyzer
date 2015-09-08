@@ -250,6 +250,25 @@ def visualize_word_frequency_timeline(convo, colors='rb'):
     plt.plot(dates, outbound, colors[1] + '-')
     plt.show()
 
+@analysis
+def get_top_words(convo, count=None, min_size=5, exclude=()):
+    count = count or int(input('Number of top words per person: '))
+    inbound, outbound = {}, {}
+    for message in convo.messages:
+        for word in (message.text or '').split():
+            if len(word) >= min_size and word not in exclude:
+                (inbound, outbound)[message.direction].setdefault(word.lower(), [0])[0] += 1
+
+    print('Your favorite words:')
+    for i,item in enumerate(sorted(inbound.items(), key=lambda i:i[1], reverse=True)[:count]):
+        print('{n:>{width}} {word}'.format(n=i+1, width=len(str(count)), word=item[0]))
+    print()
+
+    print('{}\'s favorite words:'.format(convo.display_name[:20]))
+    for i,item in enumerate(sorted(outbound.items(), key=lambda i:i[1], reverse=True)[:count]):
+        print('{n:>{width}} {word}'.format(n=i+1, width=len(str(count)), word=item[0]))
+    print()
+
 """@analysis
 def visualize_emoji_counts(convo, bins=50, lower=0, upper=250, log=False, colors='rb', grid=True):
     unicode_ranges =""" # TODO http://unicode.org/charts/ http://apps.timwhitlock.info/emoji/tables/unicode
