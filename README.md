@@ -11,3 +11,5 @@ then the temporary solution is to download Textra and use the mmssms.db file
 that it generates with smsanalyzer.
 Or, fork this project and submit a pull request to add models for other sources
 of messaging data.
+
+[Textra]: https://play.google.com/store/apps/details?id=com.textra
